@@ -1,6 +1,48 @@
 {-
 # Demo sobre Haskell
 En este archivo se van a mostrar algunos ejemplos de los temas que se fueron viendo.
+
+Para cargar este archivo en el interprete de _GHC_, deben abrir una terminal en la carpeta donde está el mismo y ejecutar:
+
+```
+ghci
+:l learningHaskell.hs
+```
+
+Pueden listar todas las definiciones en este archivo ejecutando `:browse` dentro del interprete.
+
+_nota: los `` en los comentarios es para denotar código, no tiene que ver con el uso en Haskell para utilizar una función en forma infija_
+-}
+
+{-
+## Convenciones sobre nombres
+
+En Haskell, los nombres de funciones, constantes (funciones sin argumentos), argumentos y definiciones internas, y tipos genéricos, se escriben en _camelCase_.
+
+La convención _camelCase_ determina que los nombres comienzan en minúsculas y palabras subsecuentes se escriben con la primera letra en mayúscula.
+
+Los nombres de tipos no genéricos y clases se escriben en _PascalCase_.
+
+La convención _PascalCase_ determina que los nombres comienzan en mayúsculas y palabras subsecuentes se escriben con la primera letra en mayúscula.
+
+Por ejemplo, escribir `varias palabras para un nombre` en _camelCase_ resulta en `variasPalabrasParaUnNombre` y en `VariasPalabrasParaUnNombre` utilizando _PascalCase_
+
+-}
+
+
+{-
+## Tipos básicos, listas, tuplas, y operadores básicos
+
+Algunos tipos básicos en Haskel son: enteros (`Int`); booleanos (`Bool`); caractéres (`Char`); cadenas (`String`). Además están las listas, el tipo de una lista es `[TIPO]` (ej.: `[Int]` para una lista de enteros).
+Y las tuplas de 2 a 15 elementos (ej.: `(1,2)` es una tupla con un 1 como primer elemento, y un 2 como segundo elemento), un detalle importante de las tuplas es que su tamaño no puede variar, no es posible agregar un elemento más a una tupla de 2 elementos.
+
+Algunos operadores y funciones básicas son:
+
+ 1. Operaciones aritméticas `+, -, *, /, mod, div, ^`, definiendo la suma, resta, multiplicación, división, división entera, resto, exponente (la división resulta en un real, y si se está trabajando con enteros es mucho mejor usar la división entera para no tener problemas).
+ 2. Operaciones booleanas `not, &&, ||`, definiendo la negación, la conjunción, y la disyunción. Las operaciones de conjunción y disyunción funcionan evaluando el primer argumento y solo evaluando el segundo si es necesario (ej.: `True || x` no evalúa a `x`).
+ 3. Operaciones de listas `[], [elementos separados por coma], :`, definiendo la lista vacía, una lista formada por elementos específicos (e.j.: `[1,2,3]`), la inserción a la cabeza de un elemento y otra lista.
+ 4. Operaciones de tuplas `(elementos separados por coma)`, definiendo una tupla con los elementos correspondientes (e.j.: `(1,2,3)`).
+
 -}
 
 {-
@@ -72,6 +114,8 @@ Por ejemplo, las listas en Haskell tienen 3 constructores: `[]` para listas vac�
 
 Es posible nombrar uno o más de los argumentos con `_`, significando _existe un argumento en esta posición, pero no me interesa darle un nombre_.
 
+Para números, cada número es su propio constructor, por ejemplo `0` se puede utilizar en un patrón.
+
 -}
 
 {-
@@ -93,3 +137,37 @@ pertenece [] _ = False
 pertenece (x:xs) elem | x == elem = True
                       | otherwise = pertenece xs elem
 --CODE
+
+{-
+Determinar si un número es cero utilizando patrones
+-}
+--CODE
+esCero :: Int -> Bool
+esCero 0 = True
+esCero _ = False -- es importante notar el orden, si esta definición estuviera primero, la función retornaría siempre False
+--CODE
+
+{-
+##Listas por comprensión
+
+Es posible construír una lista a partir de una función o valor generador y un conjunto de propiedades de los elementos.
+
+La forma básica para construir listas por comprensión es: `[ expresión conteniendo uno o más nombres | generación de valores para los nombres en la expresión, condiciones]`.
+
+A continuación veremos algunos ejemplos de listas por comprensión.
+
+-}
+
+{-
+Una lista con los valores 1, 2, y 3
+-}
+unoDosTres :: [Int]
+unoDosTres = [ x | x <- [1,2,3]] -- la expresión es solo un nombre (x), y los valores que toma x vienen de la lista [1,2,3]
+
+{-
+Una lista con los números pares del 1 al 10
+-}
+paresDelUnoAlDiez :: [Int]
+paresDelUnoAlDiez = [ x | x <- [1..10], x `mod` 2 == 0] -- La lista [1..10] define una lista que va del 1 al 10; y `mod` permite utilizar la función mod de manera infija.
+
+
