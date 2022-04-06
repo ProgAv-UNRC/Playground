@@ -1,4 +1,4 @@
-{-
+
 # Demo sobre Haskell
 En este archivo se van a mostrar algunos ejemplos de los temas que se fueron viendo.
 
@@ -12,9 +12,9 @@ ghci
 Pueden listar todas las definiciones en este archivo ejecutando `:browse` dentro del interprete.
 
 _nota: los `` en los comentarios es para denotar código, no tiene que ver con el uso en Haskell para utilizar una función en forma infija_
--}
 
-{-
+
+
 ## Convenciones sobre nombres
 
 En Haskell, los nombres de funciones, constantes (funciones sin argumentos), argumentos y definiciones internas, y tipos genéricos, se escriben en _camelCase_.
@@ -27,10 +27,10 @@ La convención _PascalCase_ determina que los nombres comienzan en mayúsculas y
 
 Por ejemplo, escribir `varias palabras para un nombre` en _camelCase_ resulta en `variasPalabrasParaUnNombre` y en `VariasPalabrasParaUnNombre` utilizando _PascalCase_
 
--}
 
 
-{-
+
+
 ## Tipos básicos, listas, tuplas, y operadores básicos
 
 Algunos tipos básicos en Haskel son: enteros (`Int`); booleanos (`Bool`); caractéres (`Char`); cadenas (`String`). Además están las listas, el tipo de una lista es `[TIPO]` (ej.: `[Int]` para una lista de enteros).
@@ -43,9 +43,9 @@ Algunos operadores y funciones básicas son:
  3. Operaciones de listas `[], [elementos separados por coma], :`, definiendo la lista vacía, una lista formada por elementos específicos (e.j.: `[1,2,3]`), la inserción a la cabeza de un elemento y otra lista.
  4. Operaciones de tuplas `(elementos separados por coma)`, definiendo una tupla con los elementos correspondientes (e.j.: `(1,2,3)`).
 
--}
 
-{-
+
+
 ## Definiendo funciones
 
 El formato general para definir el perfil de una función es
@@ -63,45 +63,45 @@ de tipo `a` y retorna `True` o `False`, y el resultado es una lista de elementos
 Esta función retorna una lista con todos los elementos en la lista original tal que la función asociada al segundo argumento retorna `True`.
 
 
--}
 
-{-
+
+
 sumar es una función que toma dos enteros y retorna un entero con la suma
--}
---CODE
+
+```
 sumar :: Int -> Int -> Int
 sumar a b = a + b -- a y b son nombres asociados a los argumentos
---CODE
+```
 
-{-
+
 Una constante es una función que no toma argumentos
--}
---CODE
+
+```
 cero :: Int
 cero = 0
---CODE
+```
 
-{-
+
 Es posible utilizar guardas para que el resultado de una función dependa de una o más condiciones.
 Por ejemplo, calcular el valor absoluto se puede resolver mediante guardas
--}
---CODE
+
+```
 absoluto :: Int -> Int
 absoluto n | n < 0 = n*(-1)
            | otherwise = n -- otherwise es similar a un else, acá se podría haber usado n >= 0 como condición
---CODE
+```
      
-{-
+
 Determinar si un elemento pertenece a una lista se puede hacer con múltiples guardas.
--}
---CODE
+
+```
 perteneceSoloGuardas :: [Int] -> Int -> Bool
 perteneceSoloGuardas elementos elemento | null elementos = False -- la lista está vacía, null es una función que retorna True sii una lista está vacía
                              | (head elementos) == elemento = True -- head es una función que retorna el primer elemento en una lista no vácia
                              | otherwise = perteneceSoloGuardas (tail elementos) elemento -- tail es una función que retorna todos los elementos de una lista menos el primero (ej.: tail [1,2,3] retorna [2,3])
---CODE
+```
 
-{-
+
 ## Pattern matching
 
 En muchos casos es posible utilizar patrones en lugar, o en combinación, con guardas.
@@ -116,38 +116,38 @@ Es posible nombrar uno o más de los argumentos con `_`, significando _existe un
 
 Para números, cada número es su propio constructor, por ejemplo `0` se puede utilizar en un patrón.
 
--}
 
-{-
+
+
 Determinar si un elemento pertenece a una lista, utilizando solo patrones.
--}
---CODE
+
+```
 perteneceSoloPatrones :: [Int] -> Int -> Bool
 perteneceSoloPatrones [] _ = False -- en una lista vacía, el elemento seguro no pertenece a la misma
 perteneceSoloPatrones [x] elem = x == elem -- en una lista con un solo elemento, el elemento existe si este es igual al único elemento en la lista
 perteneceSoloPatrones (x:xs) elem = (perteneceSoloPatrones [x] elem) || (perteneceSoloPatrones xs elem) -- se busca el elemento en la lista unitaria con x, y se busca recursivamente en el resto de la lista
---CODE
+```
 
-{-
+
 Determinar si un elemento pertenece a una lista, utilizando patrones y guardas.
--}
---CODE
+
+```
 pertenece :: [Int] -> Int -> Bool
 pertenece [] _ = False
 pertenece (x:xs) elem | x == elem = True
                       | otherwise = pertenece xs elem
---CODE
+```
 
-{-
+
 Determinar si un número es cero utilizando patrones
--}
---CODE
+
+```
 esCero :: Int -> Bool
 esCero 0 = True
 esCero _ = False -- es importante notar el orden, si esta definición estuviera primero, la función retornaría siempre False
---CODE
+```
 
-{-
+
 ##Listas por comprensión
 
 Es posible construír una lista a partir de una función o valor generador y un conjunto de propiedades de los elementos.
@@ -156,36 +156,36 @@ La forma básica para construir listas por comprensión es: `[ expresión conten
 
 A continuación veremos algunos ejemplos de listas por comprensión.
 
--}
 
-{-
+
+
 Una lista con los valores 1, 2, y 3
--}
---CODE
+
+```
 unoDosTres :: [Int]
 unoDosTres = [ x | x <- [1,2,3]] -- la expresión es solo un nombre (x), y los valores que toma x vienen de la lista [1,2,3]
---CODE
+```
 
-{-
+
 Una lista con los números pares del 1 al 10
--}
---CODE
+
+```
 paresDelUnoAlDiez :: [Int]
 paresDelUnoAlDiez = [ x | x <- [1..10], x `mod` 2 == 0] -- La lista [1..10] define una lista que va del 1 al 10; y `mod` permite utilizar la función mod de manera infija.
---CODE
+```
 
-{-
+
 Una lista cuyos valores son el triple de los valores de otra lista
--}
---CODE
+
+```
 triplicarDelUnoAlDiez :: [Int]
 triplicarDelUnoAlDiez = [ x * 3 | x <- [1..10]]
---CODE
+```
 
-{-
+
 Una función que dada una lista y una función unaria, ambas sobre enteros, retorna una lista donde se aplicó la función a cada elemento de la original.
--}
---CODE
+
+```
 aplicarFuncionUnariaAEnteros :: [Int] -> (Int -> Int) -> [Int]
 aplicarFuncionUnariaAEnteros lista fun = [ (fun x) | x <- lista]
---CODE
+```
