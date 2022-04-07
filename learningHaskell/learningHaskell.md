@@ -184,8 +184,91 @@ triplicarDelUnoAlDiez = [ x * 3 | x <- [1..10]]
 
 
 Una función que dada una lista y una función unaria, ambas sobre enteros, retorna una lista donde se aplicó la función a cada elemento de la original.
+Esta función es una ejemplo de función de alto orden, uno de sus parámetros es una función.
 
 ```
 aplicarFuncionUnariaAEnteros :: [Int] -> (Int -> Int) -> [Int]
 aplicarFuncionUnariaAEnteros lista fun = [ (fun x) | x <- lista]
+```
+
+
+## Definiciones locales
+
+Muchas veces dentro de la definición de una función podemos tener expresiones repetidas o de cierta complejidad que hacen al código menos legible.
+Haskell ofrece el uso de `where` dentro de la definición de una función para dar definiciones locales.
+
+Es posible definir funciones dentro del `where`, en general estas no van a tener un perfil asociado pero es posible permitir la definición de funciones
+completas (que incluyan un perfil) mediante argumentos al llamar al intérprete o el uso de pragmas (algo que escapa a lo que se va a ver en la materia).
+
+A continuación se muestran algunos ejemplos.
+
+
+
+Dada una lista de enteros, ordenada de manera ascendiente, y un entero, la función retorna True sii el elemento existe.
+La búsqueda del elemento se hace mediante búsqueda dicotómica.
+
+```
+existeEntero :: [Int] -> Int -> Bool
+existeEntero [] _ = False -- En una lista vacía no importa el valor a buscar, seguro no existe en la lista.
+existeEntero [x] elem = x == elem -- Este caso base es para poder asumir en el caso recursivo que la lista tiene al menos dos elementos
+existeEntero lista elem | elem == primeroDeLaDerecha = True
+                        | elem > primeroDeLaDerecha = existeEntero mitadDerecha elem -- se sigue la búsqueda en la mitad derecha de la lista
+                        | otherwise = existeEntero mitadIzquierda elem -- elem es menor al primero de la parte derecha, se sigue la búsqueda en la parte izquierda
+                        where longLista = length lista -- lenght retorna la longitud de una lista
+                              longMitad = longLista `div` 2 -- div es la división entera
+                              mitadIzquierda = take longMitad lista -- la mitad izquierda son los primero longMitad elementos de la lista original
+                              mitadDerecha = drop longMitad lista -- la mitad derecha es el resultado de tirar los primeros longMitad elementos de la lista original
+                              primeroDeLaDerecha = head mitadDerecha -- por las guardas que usamos, estamos seguros que ambas mitades tienen al menos un elemento
+```
+
+
+## Funciones de alto orden
+
+Una función que toma otra función como uno de sus argumentos se denomina _Función de Alto orden_.
+
+En Haskell se utilizan paréntesis para determinar que una parte del perfil corresponde a un argumento, por ejemplo:
+
+`foo :: Int -> Int -> Int` puede llamarse con `foo 1` lo que genera una función con el perfil `Int -> Int`, o como `foo 1 2` lo que genera una función (o una constante en este caso) con el perfil `Int`.
+
+No es posible llamar a `foo` con una función `bar :: Int -> Int` como primer argumento.
+
+En cambio, la definición `foo :: (Int -> Int) -> Int` requiere que el primer argumento sea una función con el perfil `Int -> Int`, y no es posible llamar `foo 1` para obtener una función con el perfil `Int -> Int`.
+
+A continuación veremos algunos ejemplos.
+
+
+
+Dadas dos funciones, una que permite filtrar enteros que cumplen una condición, y una que permite modificar un entero, y una lista de enteros,
+se retornan todos los elementos que satisfacen la propiedad con la modificación realizada por la segunda función.
+
+```
+filtrarYModificar :: (Int -> Bool) -> (Int -> Int) -> [Int] -> [Int]
+filtrarYModificar _ _ [] = [] -- para una lista vacía, las funciones no importan y se retorna una lista vacía
+filtrarYModificar prop modif (x:xs) | prop x = (modif x) : (filtrarYModificar prop modif xs) -- es posible escribir esta función mediante listas por comprensión, intente resolverlo de esa forma
+                                    | otherwise = filtrarYModificar prop modif xs
+```
+
+
+Esta función censura palabras (String) en una sentencia ([String]), y las reemplaza por una palabra (String).
+Para determinar que palabras censurar, el primer argumento es una función que dada una palabra (String) determina si censurarla (True) o no (False).
+
+_nota: utilice la función censor definida más abajo como argumento de esta función._
+
+_nota: la función `words` transforma una cadena (String) en una lista de cadenas ([String]) separando palabras mediante espacios._
+
+_nota: la función `unwords` transforma un lista de cadenas ([String]) en una cadena (String) concatenando cada palabra en la lista mediante espacios._
+
+```
+censurar :: (String -> Bool) -> String -> [String] -> [String]
+censurar _ _ [] = [] -- En una sentencia vacía no hay nada para censurar
+censurar censor reemplazo (palabra:sentencia) | censor palabra = reemplazo : (censurar censor reemplazo sentencia) -- podría resolver esta función mediante listas por comprensión?
+                                              | otherwise = palabra : (censurar censor reemplazo sentencia)
+```
+
+
+Una función que dada una lista de palabras ([String]) y una palabra (String) retorna si la palabra pertenece a la lista de palabras a censurar.
+
+```
+censor :: [String] -> String -> Bool
+censor palabrasCensuradas palabra = elem palabra palabrasCensuradas
 ```
