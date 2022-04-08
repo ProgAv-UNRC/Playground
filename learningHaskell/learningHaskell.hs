@@ -269,3 +269,111 @@ Una función que dada una lista de palabras ([String]) y una palabra (String) re
 censor :: [String] -> String -> Bool
 censor palabrasCensuradas palabra = elem palabra palabrasCensuradas
 --CODE
+
+{-
+## Tipos genéricos como argumentos y restricciones de tipo
+
+Hasta ahora todas las funciones están definidas sobre tipos específicos (Int, Bool, String, y listas de estos). Muchas veces es deseable definir funciones más genericas.
+
+Si quisieramos obtener el i-ésimo elemento de una lista, no importa de que tipo sea la lista. Si queremos buscar un elemento en una lista, solo nos interesa que los elementos en esa lista y el elemento a buscar, sean comparables entre sí.
+
+Haskell permite utilizar tipos genéricos en los perfiles de las funciones mediante el uso de nombres que empiezan con mínuscula, por ejemplo `a` en lugar de `Int`. Utilizar un nombre en lugar de un tipo particular, es equivalente a decir que
+_"se espera un valor de cualquier tipo"_. Veamos un ejemplo:
+
+```
+agregarAlFinal -> [a] -> a -> [a]
+agregarAlFinal [] elem = [elem]
+agregarAlFinal (x:xs) elem = x : (agregarAlFinal xs elem)
+```
+
+Para esta función, no importa el tipo particular de los argumentos, pero si importa que todos los argumentos sean del mismo tipo o involucren al mismo tipo.
+
+```
+:t agregarAlFinal
+agregarAlFinal :: [a] -> a -> [a]
+:t agregarAlFinal "Hola Mund"
+agregarAlFinal :: Char -> [Char]
+```
+
+Al pasar como primer argumento `"Hola Mund"` (tipo `[Char]`), Haskell infiere que `a` es de tipo `Char`.
+
+A su vez, como mencionamos anteriormente, hay situaciones en donde aceptar cualquier tipo no sirve, como por ejemplo determinar que un elemento existe en una lista, en estos casos podemos agregar restricciones:
+
+```
+existe :: (Eq a) => [a] -> a -> Bool
+existe [] _ = False
+existe (x:xs) elem = x == elem || existe xs elem -- la evaluación de la disyunción asegura que solo se realiza la llamada recursiva si `x == elem` es falso.
+```
+
+En este ejemplo se restringe el tipo `a` a cualquier tipo para el cual se pueda aplicar la función de igualdad `(==)`.
+
+A continuación se muestran algunos ejemplos.
+
+-}
+
+{-
+Esta función obtiene el i-ésimo elemento en una lista.
+
+_precondición: el índice del elemento a obtener debe estar entre 0 y la longitud de la lista - 1._
+-}
+--CODE
+nth :: [a] -> Int -> a
+nth (x:_) 0 = x
+nth (x:xs) n = nth xs (n - 1)
+--CODE
+
+{-
+Esta función permite obtener todos los elementos que sean iguales a uno buscado, determinando un límite a los elementos a retornar.
+-}
+--CODE
+buscarN :: (Eq a) => [a] -> a -> Int -> [a]
+buscarN [] _ _ = []
+buscarN _ _ 0 = []
+buscarN (x:xs) elem n | elem == x = x : (buscarN xs elem (n - 1))
+                      | otherwise = buscarN xs elem n
+--CODE
+
+{-
+Función que implementa el Algoritmo de BubbleSort.
+-}
+--CODE
+bubblesort :: (Ord a) => [a] -> [a]
+bubblesort [] = []
+bubblesort [x] = [x]
+bubblesort xs | modificada = bubblesort listaBurbujeada
+              | otherwise = listaBurbujeada
+           where (listaBurbujeada, modificada) = burbujear xs
+--CODE
+
+{-
+Función que ordena de menor a mayor, pero solo mirando elementos de a dos y haciendo un solo recorrido.
+
+La función retorna una tupla con la lista resultante y un booleando indicando si se hizo algún cambio con respecto a la lista original.
+-}
+--CODE
+burbujear :: (Ord a) => [a] -> ([a], Bool)
+burbujear [] = ([], False)
+burbujear [x] = ([x], False)
+burbujear (x:(y:xs)) = ((minVal:resto), (cambio || minVal /= x))
+                   where minVal = minimo x y
+                         maxVal = maximo x y
+                         (resto, cambio) = burbujear (maxVal:xs)
+--CODE
+      
+{-
+Función que retorna el mínimo de dos valores.
+-}  
+--CODE             
+minimo :: (Ord a) => a -> a -> a
+minimo x y | x > y = y
+           | otherwise = x
+--CODE
+
+{-
+Función que retorna el máximos de dos valores.
+-}  
+--CODE
+maximo :: (Ord a) => a -> a -> a
+maximo x y | x > y = x
+           | otherwise = y
+--CODE
