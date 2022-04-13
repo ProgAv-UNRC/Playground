@@ -16,10 +16,10 @@ Se va a tratar, siempre que sea posible, de usar [Haddock](https://hackage.haske
 
 
 - carpeta principal del proyecto
-- - src/
-- - - Main.lhs (programa principal, documenta la práctica a la vez que ofrece las funcionalidades requeridas de los distintos ejercicios)
-- - App/ (módulos)
-- - [doc/] (opcional, la documentación va acá)
+  - src/
+    - Main.lhs (programa principal, documenta la práctica a la vez que ofrece las funcionalidades requeridas de los distintos ejercicios)
+  - App/ (módulos)
+  - [doc/] (opcional, la documentación va acá)
 
 ### GHC instalación
 
