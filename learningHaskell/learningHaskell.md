@@ -377,3 +377,301 @@ maximo :: (Ord a) => a -> a -> a
 maximo x y | x > y = x
            | otherwise = y
 ```
+
+
+## Tipos
+
+Hasta ahora hemos utilizados tipos ya definidos en Haskell. Estos permiten atacar una gran cantidad de problemas, de hecho sería posible atacar cualquier problema sin definir nuevos tipos.
+Una persona podría definirse utilizando tuplas, por ejemplo `(84758475, "Bruce", "Wayne", 27/05/1939)`; un tipo que representa un resultado opcional puede definirse utilizando una lista (`[]` para _ningún resultado_, y `[r]` para _el resultado fue **r**_.
+Sin embargo, esto haría el código más complejo (se requiere lógica extra para el manejo de los datos), y menos legible (no se entiende a simple vista que hace un código particular).
+
+Por esto, definir tipos propios es indispensable. Haskell ofrece la siguiente gramática para definir un nuevo tipo:
+
+```
+TIPO -> data NOMBRE_T [VARIABLES] = CONSTRUCTORES deriving CLASES
+    NOMBRE_T -> un nombre escrito en PascalCase comenzando con una letra
+    VARIABLES -> NOMBRE_V [VARIABLES]
+    NOMBRE_V -> un nombre escrito en camelCase comenzando con una letra
+    CONSTRUCTORES -> CONSTRUCTOR [| CONSTRUCTORES]
+    CONSTRUCTOR -> NOMBRE_T [PARAMETROS]
+    PARAMETROS -> PARAMETROS_SIMPLES
+    PARAMETROS -> PARAMETROS_CON_NOMBRE
+    PARAMETROS_SIMPLES -> NOMBRE_T [PARAMETROS_SIMPLES]
+    PARAMETROS_CON_NOMBRE -> {NOMBRE_V::NOMBRE_T[, PARAMETROS_CON_NOMBRE]}
+    CLASES -> NOMBRE_T
+    CLASES -> (NOMBRE_T[, CLASES])
+```
+_nota: palabras en mayúscula requieren ser expandidas usando otras reglas; palabras entre corchetes significa que son opcionales; pueden haber varias reglas de expansión para un nombre en mayúscula_
+
+El _NOMBRE_T_ luego de `data` corresponde al nombre del nuevo tipo, por ejemplo _Lista_. Las _VARIABLES_ corresponden a variables de tipo para el tipo que definimos, por ejemplo `data Lista a = ...` significa _Listas de a_.
+Los _CONSTRUCTORES_ son funciones que permiten la construcción de valores del nuevo tipo, por ejemplo `True` y `False` son constructores para valores del tipo `Bool` de Haskell.
+Los parámetros de un constructor definen el tipo, cantidad, y orden de los argumentos que va a tomar cada uno de los constructores, por ejemplo el constructor de listas `:` toma __2__ argumentos, un elemento de tipo `a` y una lista de tipo `[a]`, en ese orden.
+El uso de parámetros con nombre permite acceder a los componentes de un valor particular de un tipo, por ejemplo un constructor de un tipo _Lista_ `Cons {primero::a, resto::[a]}` permite acceder al primer elemento y al resto de la lista respectivamente sin necesidad
+de utilizar _patter matching_, pero solo con valores construídos por el constructor _Cons_. El uso de parámetros con nombres en constructores también permite construir valores utilizando a los mismos, por ejemplo un valor de tipo _Lista_ puede ser construído como
+`Cons 1 otraLista` o `Cons {primero = 1, resto = otraLista}`, en el segundo caso, el orden de los argumentos no importa por que se especifíca a que componente se le está asignando cada valor.
+Finalmente, un tipo puede derivar clases, en términos simples una clase en Haskell define un conjunto de funciones que todo tipo que implemente esa clase va a tener. El uso del _deriving_ significa que se va a utilizar una definición por defecto de las funciones de una clase,
+aunque no siempre existe esa definición por defecto. En la sección de __Tipos genéricos como argumentos y restricciones de tipo__ vimos el uso de `... (Eq a) => ...` como una restricción sobre el tipo genérico _a_ que indica _el tipo a debe soportar las operaciones de igualdad (==) y desigualdad (/=)_. _Eq_ es una clase que define las operaciones _==_ y _/=_, esta clase tiene una implementación por defecto que utiliza los constructores utilizados para la comparación de dos valores, por ejemplo `(Succ (Succ Zero)) == (Succ Zero)` compara los nombres de los operadores, primero comparando _Succ_ con _Succ_, y luego comparando _Succ_ con _Zero_, y retornando `False`.
+
+A continuación se muestran algunos ejemplos.
+
+
+
+
+
+Un tipo que define un valor booleano.
+
+```
+data Booleano = Verdadero | Falso deriving (Show, Eq)
+```
+
+
+Una función que traduce un valor booleano (Booleano) a un valor booleano de Haskell (Bool).
+
+```
+esVerdadero :: Booleano -> Bool
+esVerdadero Verdadero = True
+esVerdadero Falso = False
+```
+
+
+Un tipo que define una variable entera y define que el tipo Variable tiene asociadas las operaciones _==_ y _/=_ provenientes de _Eq_, y _show_ proveniente de _Show_ (esta última permite visualizar valores de este tipo por terminal).
+
+```
+data Variable = Variable {valor::Int} deriving (Show, Eq)
+```
+
+
+Una función que determina si el valor asociado a una variable (Variable) es positivo utilizando patrones.
+
+```
+variablePositivaPatrones :: Variable -> Bool
+variablePositivaPatrones (Variable n) = n >= 0
+```
+
+
+Una función que determina si el valor asociado a una variable (Variable) es positivo utilizando constructores con argumentos con nombres.
+
+```
+variablePositivaParametrosConNombres :: Variable -> Bool
+variablePositivaParametrosConNombres v = (valor v) >= 0
+```
+
+```
+variable3EsPositiva :: Bool
+variable3EsPositiva = variablePositivaParametrosConNombres (Variable 3)
+```
+
+```
+variable5NegNoEsPositiva :: Bool
+variable5NegNoEsPositiva = variablePositivaPatrones (Variable {valor = (-5)})
+```
+
+
+Un tipo que define listas de enteros
+
+```
+data ListaEntera = Vacia | Cons Int ListaEntera deriving (Show, Eq)
+```
+
+```
+listaEnteraVacia :: ListaEntera
+listaEnteraVacia = Vacia
+```
+
+```
+listaEntera123 :: ListaEntera
+listaEntera123 = Cons 1 (Cons 2 (Cons 3 Vacia))
+--                      ^       ^       ^
+--                      |       |       | La ListaEntera que toma el tecer Cons
+--                      |       | La ListaEntera que toma el segundo Cons
+--                     | La ListaEnera que toma el primer Cons
+```
+
+
+Una función que dadas dos listas enteras (ListaEntera) retorna la concatencación de la primera con la segunda.
+
+```
+concatenarListasEnteras :: ListaEntera -> ListaEntera -> ListaEntera
+concatenarListasEnteras Vacia ys = ys
+concatenarListasEnteras (Cons x xs) ys = Cons x (concatenarListasEnteras xs ys)
+```
+
+
+Una función que dada una lista entera (ListaEntera) retorna la reversa de la misma.
+
+```
+reversaListaEntera :: ListaEntera -> ListaEntera
+reversaListaEntera Vacia = Vacia
+reversaListaEntera (Cons x xs) = concatenarListasEnteras (reversaListaEntera xs) (Cons x Vacia)
+```
+
+
+Un tipo que define un valor opcional, que puede representar como ningún valor (Nada) o un valor específico (Justo a).
+Haskell ofrece un tipo similar llamado _Maybe_.
+
+```
+data Quizas a = Nada | Justo a deriving (Show, Eq)
+```
+
+
+Función que retorna el índice en el que está un elemento en una lista, si el elemento no existe entonces retorna Nada.
+
+```
+indiceDe :: [Int] -> Int -> Quizas Int
+indiceDe [] _ = Nada
+indiceDe xs elem = indiceDe' xs elem 0 
+```
+
+
+Función auxiliar para _indiceDe_, que agrega un índice actual a los parámetros de la función
+
+```
+indiceDe' :: [Int] -> Int -> Int -> Quizas Int
+indiceDe' [] _ _ = Nada
+indiceDe' (x:xs) elem indiceActual | x == elem = Justo indiceActual
+                                   | otherwise = indiceDe' xs elem (indiceActual + 1)
+```
+
+
+Un tipo que define un árbol binario genérico
+
+```
+data ArbolBinario a = Vacio | Nodo {raiz::a, izquierdo::ArbolBinario a, derecho::ArbolBinario a} deriving (Show, Eq)
+```
+
+
+Función que dado un elemento, y un árbol binario del mismo tipo, retorna (si existe) el antecesor del elemento en el árbol.
+Ejemplo:
+
+Dado el árbol
+
+```
+****1
+**2***3
+```
+
+El 2 y el 3 tienen como antecesor al 1, el 1 no tiene antecesor, y el 4 no existe en el árbol.
+
+```
+antecesor :: (Eq a) => a -> ArbolBinario a -> Quizas a
+antecesor _ Vacio = Nada
+antecesor elem ab = antecesor' elem ab Nada
+```
+
+
+Función auxiliar para _antecesor_ que agrega un argumento extra que determina el antecesor actual.
+
+```
+antecesor' :: (Eq e) => e -> ArbolBinario e -> Quizas e -> Quizas e
+antecesor' _ Vacio _ = Nada
+antecesor' elem (Nodo raiz rI rD) ant | elem == raiz = ant
+                                    | antI /= Nada = antI
+                                    | antD /= Nada = antD
+                                    | otherwise = Nada
+                                    where antI = antecesor' elem rI (Justo raiz)
+                                          antD = antecesor' elem rD (Justo raiz)
+```
+
+
+## Clases
+
+En la sección de __Tipos__ mencionamos brevemente a las clases de Haskell cuando hablamos del `deriving` en la declaración de un nuevo tipo.
+En términos generales, una clase define un conjunto de propiedades o funciones. La clase _Ord_ por ejemplo, define la propiedad de órden, definiendo las operaciones _<_, _<=_, _>_, _>=_, _min_, y _max_.
+
+En la materia no nos vamos a centrar en la declaración de nuevas clases, aunque vamos a dar un ejemplo a modo ilustrativo, sino que nos vamos a centrar en dar definiciones de clases existentes para los tipos nuevos que desarrollemos,
+o en términos más cercanos a Haskell, vamos a instanciar clases para tipos particulares.
+
+
+
+Ejemplo de una clase Igualdad que define las operaciones _iguales_ y _distintos_.
+En `Igualdad a`, `a` se refiere a un tipo genérico, en otros términos estamos diciendo _a va a tener la propiedad de Igualdad_ cuando defina las siguientes funciones.
+
+Un detalle importante, y algo que puede parecer extraño e incluso incorrecto, es que las funciones `iguales` y `distintos` están definidas de manera circular.
+Las funciones dentro de una clase no tienen por qué tener una implementación, con solo definir el perfil alcanza. El definir una función en base a la otra y viceversa, nos permite
+solo dar la definición de una de estas cuando instanciemos la clase a un tipo particular.
+
+Así como vimos la gramática para definir un nuevo tipo, vamos a ver la gramática para instanciar una clase para un tipo particular:
+
+```
+INSTANCIACION -> instance [(RESTRICCIONES)] CLASE TIPO where DEFINICIONES
+    RESTRICCIONES -> NOMBRE_T VARIABLES [, RESTRICCIONES]
+    NOMBRE_T -> un nombre escrito en PascalCase comenzando con una letra
+    VARIABLES -> NOMBRE_V [VARIABLES]
+    CLASE -> NOMBRE_T
+    TIPO -> TIPO_SIN_ARGUMENTOS
+    TIPO -> TIPO_CON_ARGUMENTOS
+    TIPO_SIN_ARGUMENTOS -> NOMBRE_T
+    TIPO_CON_ARGUMENTOS -> (NOMBRE_T VARIABLES)
+    DEFINICIONES -> definiciones de las funciones asociadas (no es necesario el perfil), y se definen como funciones normales.
+```
+
+A continuación veremos algunos ejemplos.
+
+
+```
+class Igualdad a where
+    iguales :: a -> a -> Bool
+    iguales a b = not (distintos a b)
+    distintos :: a -> a -> Bool
+    distintos a b = not (iguales a b)
+```
+
+
+Un tipo que define una tupla homogénea. No escribimos `deriving (Show, Eq, Igualdad)`, por que vamos a instanciar esas clases a continuación.
+
+```
+data Tupla a = Tupla {primero::a, segundo::a}
+```
+
+
+Instanciación de Igualdad para tuplas genéricas (`Tupla a`).
+Como en Igualdad las funciones `iguales` y `distintos` están definidas una en base a la otra, solo es necesario definir una de ellas para el tipo actual.
+
+En este caso, es necesario que los elementos dentro de una tupla puedan ser comparados, por esto agregamos la restricción `Eq a`.
+
+```
+instance (Eq a) => Igualdad (Tupla a) where
+    iguales (Tupla a b) (Tupla x y) = (a == x) && (b == y)
+```
+
+
+Al igual que la clase Igualdad, la clase Eq no requiere que definamos ambas funciones `==` y `/=`, solo con una alcanza.
+
+Nuevamente, es necesario agregar la restricción `Eq a` para comparar los elementos dentro de la tupla.
+
+```
+instance (Eq a) => Eq (Tupla a) where
+    (Tupla a b) == (Tupla x y) = (a == x) && (b == y)
+```
+
+
+En el caso de la clase Show, solo necesitamos definir la función `show`, la cual tiene el perfil `show :: a -> String`.
+
+La restricción `Show a` es necesaria para poder mostrar los elementos dentro de la tupla.
+
+```
+instance (Show a) => Show (Tupla a) where
+    show (Tupla x y) = "{" ++ (show x) ++ ", " ++ (show y) ++ "}"
+```
+
+
+Un tipo que define a los naturales, todo valor va a ser un cero o el sucesor de un natural.
+
+```
+data Nat = Zero | Succ Nat
+```
+
+
+Si utilizaramos `deriving Show` en la definición de Nat, el natural 8 lo veríamos como `Succ (Succ (Succ (Succ (Succ (Succ (Succ (Succ Zero)))))))` lo cual no es muy legible.
+Nos gustaría una mejor visualización, por ejemplo `Nat 8`.
+
+```
+instance Show Nat where
+    show n = "Nat " ++ (show (natToInt n))
+           where natToInt Zero = 0
+                 natToInt (Succ n) = 1 + (natToInt n)
+```
+
+
+Como ejercicio instancie la clase Eq para el tipo Nat, sin transformar a enteros.
+
