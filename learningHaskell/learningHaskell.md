@@ -484,7 +484,7 @@ listaEntera123 = Cons 1 (Cons 2 (Cons 3 Vacia))
 --                      ^       ^       ^
 --                      |       |       | La ListaEntera que toma el tecer Cons
 --                      |       | La ListaEntera que toma el segundo Cons
---                     | La ListaEnera que toma el primer Cons
+--                      | La ListaEnera que toma el primer Cons
 ```
 
 
