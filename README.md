@@ -16,10 +16,10 @@ Se va a tratar, siempre que sea posible, de usar [Haddock](https://hackage.haske
 
 
 - carpeta principal del proyecto
-- - src/
-- - - Main.lhs (programa principal, documenta la práctica a la vez que ofrece las funcionalidades requeridas de los distintos ejercicios)
-- - App/ (módulos)
-- - [doc/] (opcional, la documentación va acá)
+  - src/
+    - Main.lhs (programa principal, documenta la práctica a la vez que ofrece las funcionalidades requeridas de los distintos ejercicios)
+  - App/ (módulos)
+  - [doc/] (opcional, la documentación va acá)
 
 ### GHC instalación
 
@@ -29,8 +29,6 @@ Si solo quieren instalar GHC (junto al intérprete GHCi) pueden ir a la siguient
 
 Aunque en la materia alcanza con solo GHC, si quieren instalar GHC junto a otras herramientas que pueden ser útiles como cabal, pueden ir a la siguiente [página](https://www.haskell.org/downloads/).
 
-## Estructura de proyectos en Dafny
-__TODO__
-
 ## Dafny instalación
-__TODO__
+
+Para instalar Dafny hay dos opciones: instalar [Visual Studio Code](https://code.visualstudio.com/), e instalar la extensión dafny; o pueden instalar la [versión por terminal siguiendo estas instrucciones](https://github.com/dafny-lang/dafny/wiki/INSTALL#install-the-binaries). Nosotros recomendamos la primera opción, es mucho más simple. Para más información pueden [consultar la wiki](https://github.com/ProgAv-UNRC/Playground/wiki/Configurando-herramientas#dafny).
